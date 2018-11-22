@@ -15,12 +15,23 @@ class DockerController {
 	init() {
 		ipcMain
 			.on('exe', (event, val) => {
-				this.containerExecutor('POST', `http:/containers/${val.id}/${val.cmd}`)
-					.then(res => {
-						sendData('exe-reply', {action: 'start-stop', res})
-						//TODO after start-stop, reload the status, add a spinning loader
-						this.loadStates()
-					})
+				switch (val.action) {
+					case 'start-stop':
+						this.containerExecutor('POST', `http:/containers/${val.id}/${val.cmd}`)
+							.then(res => {
+								sendData('exe-reply', {action: val.action, res})
+								//TODO after start-stop, reload the status, add a spinning loader
+								this.loadStates()
+							})
+						break
+					case 'inspect':
+						this.containerExecutor('GET', `http:/containers/${val.id}/json`)
+							.then(res => {
+								sendData('exe-reply', {action: val.action, res})
+							})
+				}
+
+
 			})
 			.on('refresh',()=>{
 				this.loadStates()

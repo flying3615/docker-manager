@@ -16,14 +16,17 @@ $(document).ready(() => {
         .on('exe-reply', (event, value) => {
           console.log(value);
 
-          switch (value.action){
+					switch (value.action) {
 						case 'start-stop':
-              // TODO, hide blocker
-							console.log('start-stop return...')
-              break
-            case 'list-all':
+							// TODO, hide blocker
+							console.log('start-stop return...', value.res)
+							break
+						case 'inspect':
+							console.log('inspect return...', value.res)
+							break
+						case 'list-all':
 							listAllResultHandler(value.res)
-              break
+							break
           }
         });
 
@@ -47,14 +50,26 @@ $(document).ready(() => {
       newRow.append($('<td/>').text(this));
     });
     const state = rowData.includes('running') ? 'stop' : 'start';
-    const button = $(`<button id=${containerId}>${state}</button>`);
-    newRow.append(button)
+    const startStopBtn = $(`<button id="${containerId}" class="btn startStopBtn_${containerId}">${state}</button>`);
+    const inspectBtn = $(`<button id="${containerId}" class="btn inspectBtn_${containerId}">Inspect</button>`);
+
+    newRow.append(startStopBtn)
+    newRow.append(inspectBtn)
     tbody.append(newRow)
-    $('#containers').on('click', `#${containerId}`, function () {
+
+		//start-stop
+    $('#containers').on('click', `.startStopBtn_${containerId}`, function () {
       console.log(`${this.id} ${this.innerText}`);
 			//TODO enable blocker...
-      ipcRenderer.send('exe', { id: this.id, cmd: this.innerText });
+      ipcRenderer.send('exe', { action: 'start-stop', id: this.id, cmd: this.innerText });
     });
+
+    //inspect
+		$('#containers').on('click', `.inspectBtn_${containerId}`, function () {
+			console.log(`${this.id} ${this.innerText}`);
+			ipcRenderer.send('exe', { action: 'inspect', id: this.id});
+		});
+
     return newRow;
   }
 });
