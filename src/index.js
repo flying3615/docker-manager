@@ -67,7 +67,12 @@ app.on('activate', () => {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
 
-
+/**
+ * use to let ipcMain send event until window is ready
+ * @param channel
+ * @param args
+ * @returns {Promise<void>}
+ */
 export async function sendData(channel, ...args) {
   if (mainWindow) {
     await readyPromise
