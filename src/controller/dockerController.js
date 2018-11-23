@@ -30,8 +30,6 @@ class DockerController {
 								sendData('exe-reply', {action: val.action, res})
 							})
 				}
-
-
 			})
 			.on('refresh',()=>{
 				this.loadStates()
@@ -53,6 +51,7 @@ class DockerController {
 	async containerExecutor(method, url) {
 		try {
 			const cmd = `curl --unix-socket /var/run/docker.sock -X ${method} ${url}`;
+			console.log('Command ',cmd)
 			const {
 				stdout,
 				stderr,
