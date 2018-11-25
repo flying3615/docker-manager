@@ -57,8 +57,8 @@ class DockerController {
 				stderr,
 			} = await exec(cmd);
 			const jsonResult = JSON.parse(stdout);
-			console.log(`stdout=${stdout}`);
-			console.log(`stderr=${stderr}`);
+			// console.log(`stdout=${stdout}`);
+			// console.log(`stderr=${stderr}`);
 			return jsonResult;
 		} catch (err) {
 			console.log(`happen  error ${err}`);
