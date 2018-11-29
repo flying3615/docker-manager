@@ -21,27 +21,31 @@ $(document).ready(() => {
 		))
 	})
 
-  ipcRenderer
-        .on('exe-reply', (event, value) => {
+	ipcRenderer
+		.on('exe-reply', (event, value) => {
 
-					switch (value.action) {
-						case 'start-stop':
-							// TODO, hide blocker
-							break
-						case 'inspect':
-
-							$('.modal-body')[0].innerText = JSON.stringify(value.res, null, 2)
-							break
-						case 'list-all':
-							containersResult = value.res
-							listAllResultHandler(value.res)
-							break
-          }
-        });
+			switch (value.action) {
+				case 'start-stop':
+					// remove mask
+					$('#mask').remove();
+					break
+				case 'inspect':
+					$('.modal-body')[0].innerText = JSON.stringify(value.res, null, 2)
+					break
+				case 'list-all':
+					containersResult = value.res
+					listAllResultHandler(value.res)
+					break
+			}
+		})
+		.on('error', (event, error) => {
+			$('#errorMsg').innerText = error.msg
+			$('.alert').alert()
+		});
 
   function listAllResultHandler(result) {
 		$('#tbody').empty()
-		result.sort((a, b) => a.State > b.State ? -1 : a.State < b.State ? 1 : 0) //TODO not working...
+		result.sort((a, b) => a.State > b.State ? -1 : a.State < b.State ? 1 : 0)
 			.forEach((element, index) => {
 				const networkObj = element.NetworkSettings.Networks;
 				const IPAddress = networkObj[Object.keys(networkObj)[0]].IPAddress;
@@ -66,23 +70,41 @@ $(document).ready(() => {
 		newRow.html(`<th scope="row">${index}</th>`+rowContent);
 
 		const state = rowData.includes('running') ? 'stop' : 'start';
-    const startStopBtn = $(`<td><button class="btn startStopBtn_${containerId}">${state}</button></td>`);
+		const state_cls = rowData.includes('running') ? 'btn-danger' : 'btn-success';
+    const startStopBtn = $(`<td><button class="btn ${state_cls} startStopBtn_${containerId}">${state}</button></td>`);
     newRow.append(startStopBtn)
     tbody.append(newRow)
 
 		//start-stop
-    $('#containers').on('click', `.startStopBtn_${containerId}`, function () {
-			//TODO enable blocker...
+		newRow.on('click', `.startStopBtn_${containerId}`, function () {
+			// show mask...
+			console.log(`click ${containerId}`)
+			maskPage()
       ipcRenderer.send('exe', { action: 'start-stop', id: containerId, cmd: this.innerText });
     });
 
     return newRow;
   }
 
+  // trigger to show container detail
 	$('#exampleModalCenter').on('shown.bs.modal', function (e) {
 		const invoker = $(e.relatedTarget)
 			ipcRenderer.send('exe', { action: 'inspect', id: invoker.attr('id')});
 	})
+
+
+	function maskPage() {
+		const maskDiv = $("<div class=\"row h-100 justify-content-center align-items-center\" id='mask'><i class=\"fa fa-circle-o-notch fa-spin\" style=\"font-size:48px;z-index: 11;color: white\"></i></div>")
+		maskDiv.css({"opacity":"0.5",
+			"background-color": "#000",
+			"position":"fixed",
+			"width":"100%",
+			"height":"100%",
+			"top":"0px",
+			"left":"0px",
+			"z-index":"10"})
+		$('body').append(maskDiv)
+	}
 
 
 });
